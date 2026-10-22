@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Звёздная ночь — купола под звёздами</title>
+  <meta name="description" content="Учебный сайт бронирования куполов-глэмпинга на горном склоне.">
+  <meta name="theme-color" content="#070404">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://images.unsplash.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='36' fill='black' stroke='%23e8833f' stroke-width='8'/></svg>">
+</head>
+<body>
+  <a class="skip" href="#map">Перейти к выбору купола</a>
+
+  <!-- Первый экран: фото на всю ширину -->
+  <header class="hero" id="top">
+    <div class="hero__photo photo">
+      <img
+        src="https://images.unsplash.com/photo-1543894597-1bf562842844?auto=format&fit=crop&w=1800&q=75"
+        srcset="https://images.unsplash.com/photo-1543894597-1bf562842844?auto=format&fit=crop&w=900&q=75 900w,
+                https://images.unsplash.com/photo-1543894597-1bf562842844?auto=format&fit=crop&w=1800&q=75 1800w"
+        sizes="100vw"
+        alt="Купол-палатка под Млечным путём в горах"
+        onerror="this.parentNode.classList.add('is-broken')">
+    </div>
+
+    <nav class="topbar" aria-label="Разделы">
+      <a class="logo" href="#top">Звёздная ночь</a>
+      <a class="topbar__link" href="#bookings">Мои брони <span id="nav-count" class="nav__count" hidden>0</span></a>
+    </nav>
+
+    <div class="hero__content">
+      <h1 class="hero__title">Звёздная <em>ночь</em></h1>
+      <p class="hero__tag">Восемь прозрачных куполов на склоне Алтая. Ни одного фонаря — только небо.</p>
+      <a class="btn btn--primary" href="#map">Выбрать купол</a>
+    </div>
+  </header>
+
+  <main class="page">
+    <div id="banner" class="banner" role="alert" hidden></div>
+    <div id="start-error" class="banner" role="alert" hidden>
+      <strong>Сайт не запустился.</strong>
+      <span id="start-error-text"></span>
+    </div>
+
+    <!-- Карта, фильтры и бронирование -->
+    <section class="section" id="map" aria-labelledby="map-title">
+      <div class="section__head">
+        <h2 class="section__title" id="map-title">Выберите купол</h2>
+        <p class="section__lead">Огоньки на склоне — купола, свободные на ваши даты.</p>
+      </div>
+
+      <form class="filters" id="filters" aria-label="Даты и фильтры">
+        <div class="filter">
+          <span class="filter__label">Даты</span>
+          <button class="dates-btn dates-btn--big" id="dates-button" type="button">
+            <span class="dates-btn__moon" aria-hidden="true"></span>
+            <strong class="dates-btn__range"></strong>
+            <span class="dates-btn__nights"></span>
+          </button>
+        </div>
+
+        <label class="filter">
+          <span class="filter__label">Гостей</span>
+          <select class="select" name="guests">
+            <option value="0">сколько угодно</option>
+            <option value="1">от 1</option>
+            <option value="2">от 2</option>
+            <option value="3">от 3</option>
+            <option value="4">от 4</option>
+            <option value="5">от 5</option>
+            <option value="6">6</option>
+          </select>
+        </label>
+
+        <label class="filter filter--range">
+          <span class="filter__label">До <output id="price-output"></output> за ночь</span>
+          <input class="range" name="maxPrice" type="range">
+        </label>
+
+        <label class="switch">
+          <input type="checkbox" name="telescope">
+          <span class="switch__track" aria-hidden="true"></span>
+          <span>С телескопом</span>
+        </label>
+
+        <div class="filters__end">
+          <span class="filters__found" id="found" aria-live="polite"></span>
+          <button class="link-btn" type="reset">Сбросить</button>
+        </div>
+      </form>
+
+      <div class="layout">
+        <div class="map-wrap">
+          <div class="slope" id="slope-map"></div>
+          <p class="legend">
+            <span><i class="legend__pin" aria-hidden="true">✕</i> занят</span>
+            <span><i class="legend__pin legend__pin--mine" aria-hidden="true">★</i> ваша бронь</span>
+          </p>
+        </div>
+
+        <aside class="booking" id="booking" aria-label="Бронирование" aria-live="polite"></aside>
+      </div>
+    </section>
+
+    <!-- Список: фото-карточки -->
+    <section class="section" id="domes" aria-labelledby="domes-title">
+      <div class="section__head section__head--row">
+        <h2 class="section__title" id="domes-title">Все купола</h2>
+        <label class="sort">
+          <span class="visually-hidden">Сортировка</span>
+          <select class="select select--quiet" id="sort">
+            <option value="free">Сначала свободные</option>
+            <option value="cheap">Сначала дешевле</option>
+            <option value="expensive">Сначала дороже</option>
+            <option value="capacity">Самые вместительные</option>
+          </select>
+        </label>
+      </div>
+      <p class="empty" id="list-empty" hidden>
+        Ничего не нашлось. Поднимите цену или уменьшите число гостей.
+      </p>
+      <ul class="dome-list" id="dome-list"></ul>
+    </section>
+
+    <!-- Мои брони -->
+    <section class="section" id="bookings" aria-labelledby="bookings-title">
+      <div class="section__head section__head--row">
+        <h2 class="section__title" id="bookings-title">Мои брони</h2>
+        <button class="link-btn" id="reset-demo" type="button">Сбросить демо</button>
+      </div>
+      <div id="my-bookings" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p class="footer__note">Учебное демо: бронирования сохраняются только в этом браузере</p>
+    <p>Реальная бронь и оплата не оформляются. Фото — <a href="https://unsplash.com" target="_blank" rel="noopener">Unsplash</a>.</p>
+  </footer>
+
+  <dialog class="dialog" id="confirm-dialog" aria-labelledby="dialog-title">
+    <form method="dialog">
+      <h3 class="dialog__title" id="dialog-title"></h3>
+      <p class="dialog__text" id="dialog-text"></p>
+      <div class="dialog__actions">
+        <button class="btn btn--ghost" value="cancel" id="dialog-cancel"></button>
+        <button class="btn btn--primary" value="ok" id="dialog-ok"></button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="dialog cal" id="calendar" aria-label="Выбор дат"></dialog>
+
+  <!-- Талон: показывается на экране, оттуда можно распечатать или сохранить в PDF -->
+  <dialog class="dialog ticket-dialog" id="ticket-dialog" aria-labelledby="pt-number">
+    <div id="print-ticket" class="print-ticket"></div>
+    <div class="dialog__actions ticket-dialog__actions">
+      <button class="btn btn--ghost" type="button" data-ticket="close">Закрыть</button>
+      <button class="btn btn--primary" type="button" data-ticket="print">Распечатать или PDF</button>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="js/main.js"></script>
+  <script>
+    // Подсказка, если модули не запустились (например, файл открыт двойным кликом)
+    setTimeout(function () {
+      if (window.zvStarted) return;
+      var box = document.getElementById('start-error');
+      var text = document.getElementById('start-error-text');
+      text.textContent = location.protocol === 'file:'
+        ? ' Страница открыта как файл (адрес начинается с file://), а браузер не запускает так JS-модули. Откройте через Live Server в VS Code или выполните «python -m http.server 8000» в папке проекта и зайдите на http://localhost:8000'
+        : ' Скрипт не загрузился. Нажмите F12 → Console и посмотрите текст ошибки.';
+      box.hidden = false;
+    }, 1500);
+  </script>
+</body>
+</html>
